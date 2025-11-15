@@ -6,11 +6,22 @@ import json
 from .models import CodeExecution
 from .services.rust_executor import RustExecutor
 from .services.miri_parser import MiriParser
+from .services.python_executor import PythonExecutor
 
 
 def index(request):
-    """Main debugger interface"""
-    return render(request, 'debugger/index.html')
+    """Home page with language selection"""
+    return render(request, 'debugger/home.html')
+
+
+def rust_editor(request):
+    """Rust debugger interface"""
+    return render(request, 'debugger/rust_editor.html')
+
+
+def python_editor(request):
+    """Python programming interface"""
+    return render(request, 'debugger/python_editor.html')
 
 
 @csrf_exempt
@@ -89,5 +100,32 @@ def get_execution(request, execution_id):
         })
     except CodeExecution.DoesNotExist:
         return JsonResponse({'error': 'Execution not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def execute_python_code(request):
+    """Execute Python code and return output"""
+    try:
+        data = json.loads(request.body)
+        code = data.get('code', '')
+        
+        if not code:
+            return JsonResponse({'error': 'No code provided'}, status=400)
+        
+        # Execute Python code
+        executor = PythonExecutor(timeout=30)
+        result = executor.execute(code)
+        
+        return JsonResponse({
+            'success': result.get('success', False),
+            'stdout': result.get('stdout', ''),
+            'stderr': result.get('stderr', ''),
+            'execution_time': result.get('execution_time', 0.0),
+            'plots': result.get('plots', [])
+        })
+    
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
