@@ -199,19 +199,21 @@ function showPythonExampleMenu() {
         const categoryHeader = document.createElement('div');
         categoryHeader.className = 'category-header';
         categoryHeader.innerHTML = `${category.name} <i class="fas fa-chevron-down"></i>`;
+        
+        const exampleGrid = document.createElement('div');
+        exampleGrid.className = 'example-grid';
+        
         categoryHeader.onclick = function() {
             this.classList.toggle('collapsed');
             exampleGrid.style.display = this.classList.contains('collapsed') ? 'none' : 'grid';
         };
-        
-        const exampleGrid = document.createElement('div');
-        exampleGrid.className = 'example-grid';
         
         category.examples.forEach(ex => {
             const btn = document.createElement('button');
             btn.className = 'btn btn-secondary btn-sm example-item';
             btn.textContent = ex.name;
             btn.onclick = () => {
+                console.log('Example button clicked:', ex.key);
                 loadPythonExample(ex.key);
                 menu.remove();
             };
@@ -235,6 +237,7 @@ function showPythonExampleMenu() {
 }
 
 function loadPythonExample(key) {
+    console.log('loadPythonExample called with key:', key);
     const examples = {
         'ml_linear_regression': `# Linear Regression Example with Visualization
 import numpy as np
@@ -4362,6 +4365,7 @@ for order in orders:
     };
     
     const code = examples[key] || '# Example not found';
+    console.log('Loading example:', key, 'Found:', code !== '# Example not found');
     setEditorCode(code);
 }
 
